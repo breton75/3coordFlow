@@ -52,4 +52,4 @@ char mmcReadSectors(BYTE *buff,	DWORD sector,	UINT count);
 unsigned char mmcGetResponseR1b(void);
 void spi_read_frame(SPI_TypeDef * SPI, uint8_t * buffer, unsigned int size);
 #endif
-	
+

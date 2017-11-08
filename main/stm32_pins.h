@@ -2,10 +2,10 @@
 #define STM32_PINS_H
 
 
-#include "../STM32f107_Firmware/CMSIS/in_coc/stm32f10x.h"
-#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h"
-#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h"
-#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_spi.h"
+//#include "../STM32f107_Firmware/CMSIS/in_coc/stm32f10x.h"
+//#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h"
+//#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h"
+//#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_spi.h"
 
 /*! ------- STM32 & SPI ---------!*/
 #define STM_TDC_INT_3_Pin       GPIO_Pin_5

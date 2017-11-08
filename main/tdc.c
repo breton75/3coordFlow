@@ -1,18 +1,10 @@
 #include "tdc.h"
 
-//#include "../CMSIS/in_coc/stm32f10x.h"
-//#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h"
-//#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h"
-//#include "../STM32F10x_StdPeriph_Driver/inc/stm32f10x_spi.h"
-
-//void TDC_ex();
 
 #define SKO_size 12
 
-void TDC_SPI_Init(void)
+void tdc_init(void)
 {
-    int ifor;
-		char _in_data;
     SPI_InitTypeDef SPI_InitStruct;
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -26,7 +18,7 @@ void TDC_SPI_Init(void)
     GPIO_Init(GPIOA, &GPIO_InitStructure);    
     
     ///
-    GPIO_InitStructure.GPIO_Pin = STM32_TRIGGER_2 | STM32_TRIGGER_3_Pin;
+    GPIO_InitStructure.GPIO_Pin = STM32_TRIGGER_2_Pin | STM32_TRIGGER_3_Pin;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);   
     
@@ -77,7 +69,7 @@ void TDC_SPI_Init(void)
 
 
 
-    /** Запускаем тактирование пинов **/
+    /** Р—Р°РїСѓСЃРєР°РµРј С‚Р°РєС‚РёСЂРѕРІР°РЅРёРµ РїРёРЅРѕРІ **/
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
     
     
@@ -92,212 +84,141 @@ void TDC_SPI_Init(void)
     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
 
     /** SPI_BaudRatePrescaler
-     *  000 — fPCLK/2,   001 — fPCLK/4,  010 — fPCLK/8,
-     *  011 — fPCLK/16,  100 — fPCLK/32, 101 — fPCLK/64,
-     *  110 — fPCLK/128, 111 — fPCLK/256                        **/
+     *  000 вЂ” fPCLK/2,   001 вЂ” fPCLK/4,  010 вЂ” fPCLK/8,
+     *  011 вЂ” fPCLK/16,  100 вЂ” fPCLK/32, 101 вЂ” fPCLK/64,
+     *  110 вЂ” fPCLK/128, 111 вЂ” fPCLK/256                        **/
 
-    /** запускаем SPI **/
+    /** Р·Р°РїСѓСЃРєР°РµРј SPI **/
     SPI_Init(SPI2, &SPI_InitStruct);
     SPI_Cmd(SPI2, ENABLE);
     
+    /** РїРµСЂРµРґРµСЂРіРёРІР°РµРј ENABLE, С‡С‚РѕР±С‹ СЃР±СЂРѕСЃРёС‚СЊ РІСЃРµ РјРёРєСЂРѕСЃС…РµРјС‹ **/
     /* 1. After powering up the device, the EN pin needs to be low.
      * There is one low to high transition required while VDD is supplied for correct initialization of the device. */
     GPIO_ResetBits(GPIOB, STM_TDC7200_EN1_Pin | STM_TDC7200_EN2_Pin | STM_TDC7200_EN3_Pin);
     GPIO_ResetBits(GPIOC, TDC1000_ENABLE_Pin | TDC1000_RESET_Pin);
     GPIO_ResetBits(GPIOE, STM_TDC_INT_1_Pin | STM_TDC_INT_2_Pin | STM_TDC_INT_3_Pin);
-//     for(ifor = 0; ifor < 500000; ifor++); // ??? why
+//     for(ifor = 0; ifor < 500000; ifor++); // ??? Р·Р°С‡РµРј ??
     GPIO_SetBits(GPIOB, STM_TDC7200_EN1_Pin | STM_TDC7200_EN2_Pin | STM_TDC7200_EN3_Pin);
     GPIO_SetBits(GPIOC, TDC1000_ENABLE_Pin);//  | TDC1000_RESET);
 
-    for(ifor = 0; ifor < 6; ifor += 2)
-    {
-			while (TDC_read_data(ifor, TDC7200_CONFIG1_REG) != (TDC7200_CONFIG1 & 0xFE))
-        TDC_write_data(ifor,TI_TDC720x_CONFIG1_REG,TDC7200_CONFIG1 & 0xFE); // 10000010 (Dx130)
-      
-			while (TDC_read_data(ifor,TI_TDC720x_CONFIG2_REG)!= (TDC7200_CONFIG2) )
-        TDC_write_data(ifor,TI_TDC720x_CONFIG2_REG,TDC7200_CONFIG2);        // 10000100 (Dx132)
-			
-        TDC_write_data(ifor,TI_TDC720x_INTRPT_STATUS_REG,TDC7200_INT_STATUS); // 0x00
-        
-        TDC_write_data(ifor,TI_TDC720x_INTRPT_MASK_REG,TDC7200_INT_MASK);  //  0x07
-        
-        TDC_write_data(ifor,TI_TDC720x_COARSE_COUNTER_OVH_REG,TDC7200_COARSE_CNTR_OVF_H);
-        TDC_write_data(ifor,TI_TDC720x_COARSE_COUNTER_OVL_REG,TDC7200_COARSE_CNTR_OVF_L);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNTER_OVH_REG,TDC7200_CLOCK_CNTR_OVF_H);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNTER_OVL_REG,TDC7200_CLOCK_CNTR_OVF_L);
-        
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNTER_STOP_MASKH_REG,TDC7200_CLOCK_CNTR_STOP_MASK_H);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNTER_STOP_MASKL_REG,TDC7200_CLOCK_CNTR_STOP_MASK_L);
-        
-        TDC_write_data(ifor,TI_TDC720x_TIME1_REG,TDC7200_TIME1);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNT1_REG,TDC7200_CLOCK_COUNT1);
-        TDC_write_data(ifor,TI_TDC720x_TIME2_REG,TDC7200_TIME2);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNT2_REG,TDC7200_CLOCK_COUNT2);
-        TDC_write_data(ifor,TI_TDC720x_TIME3_REG,TDC7200_TIME3);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNT3_REG,TDC7200_CLOCK_COUNT3);
-        TDC_write_data(ifor,TI_TDC720x_TIME4_REG,TDC7200_TIME4);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNT4_REG,TDC7200_CLOCK_COUNT4);
-        TDC_write_data(ifor,TI_TDC720x_TIME5_REG,TDC7200_TIME5);
-        TDC_write_data(ifor,TI_TDC720x_CLOCK_COUNT5_REG,TDC7200_CLOCK_COUNT5);
-        TDC_write_data(ifor,TI_TDC720x_TIME6_REG,TDC7200_TIME6);
-        
-        TDC_write_data(ifor,TI_TDC720x_CALIBRATION1_REG,TDC7200_CALIBRATION1);
-        TDC_write_data(ifor,TI_TDC720x_CALIBRATION2_REG,TDC7200_CALIBRATION2);
-    }
-
-    for(ifor = 1; ifor < 6; ifor += 2)
-    {
-			while (TDC_read_data(ifor,TI_TDC1000_CONFIG0_REG) != (TI_TDC1000_CONFIG0_REG_VALUE))
-        TDC_write_data(ifor,TI_TDC1000_CONFIG0_REG,TI_TDC1000_CONFIG0_REG_VALUE);
-      
-        TDC_write_data(ifor,TI_TDC1000_CONFIG1_REG,TI_TDC1000_CONFIG1_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_CONFIG2_REG,TI_TDC1000_CONFIG2_REG_VALUE_CH1);
-        TDC_write_data(ifor,TI_TDC1000_CONFIG3_REG,TI_TDC1000_CONFIG3_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_CONFIG4_REG,TI_TDC1000_CONFIG4_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_TOF1_REG,TI_TDC1000_TOF1_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_TOF0_REG,TI_TDC1000_TOF0_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_ERROR_FLAGS_REG,TI_TDC1000_ERROR_FLAGS_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_TIMEOUT_REG,TI_TDC1000_TIMEOUT_REG_VALUE);
-        TDC_write_data(ifor,TI_TDC1000_CLOCK_RATE_REG,TI_TDC1000_CLOCK_RATE_REG_VALUE);
-    }
-
-    TDC_write_data(ifor+1,TI_TDC1000_CONFIG0_REG,TI_TDC1000_CONFIG0_REG_VALUE);
-
-
+    
+    /*! РїРёС€РµРј РєРѕРЅС„РёРіСѓСЂР°С†РёРё РІ РјРёРєСЂРѕСЃС…РµРјС‹ TDC !*/
+    configure7200(TDC7200_1);
+    configure7200(TDC7200_2);
+    configure7200(TDC7200_3);
+    
+    configure1000(TDC1000_1);
+    configure1000(TDC1000_2);
+    configure1000(TDC1000_3);
+    
 }
 
-TOF get_tof(uint8_t tdc7200chip)
+void configure7200(uint8_t tdc7200chip)
 {
-  TOF result;
+  chip_select(tdc7200chip);
+  write_spi(TDC7200_CONFIG1_ADRESS, TDC7200_CONFIG1);
+  write_spi(TDC7200_CONFIG2_ADRESS, TDC7200_CONFIG2);
+  write_spi(TDC7200_INT_STATUS_ADRESS, TDC7200_INT_STATUS);
+  write_spi(TDC7200_INT_MASK_ADRESS, TDC7200_INT_MASK);
+  write_spi(TDC7200_COARSE_CNTR_OVF_H_ADRESS, TDC7200_COARSE_CNTR_OVF_H);
+  write_spi(TDC7200_COARSE_CNTR_OVF_H_ADRESS, TDC7200_COARSE_CNTR_OVF_H);
+  write_spi(TDC7200_CLOCK_CNTR_OVF_H_ADRESS, TDC7200_CLOCK_CNTR_OVF_H);
+  write_spi(TDC7200_CLOCK_CNTR_STOP_MASK_H_ADRESS, TDC7200_CLOCK_CNTR_STOP_MASK_H);
+  write_spi(TDC7200_CLOCK_CNTR_STOP_MASK_L_ADRESS, TDC7200_CLOCK_CNTR_STOP_MASK_L);
+  chip_select(TDC_NONE);
+}
+
+void configure1000(uint8_t tdc1000chip)
+{
+  chip_select(tdc1000chip);
+  write_spi(TDC1000_CONFIG_1_ADRESS, TDC1000_CONFIG_1);
+  write_spi(TDC1000_CONFIG_0_ADRESS, TDC1000_CONFIG_0);
+  write_spi(TDC1000_CONFIG_2_ADRESS, TDC1000_CONFIG_2);
+  write_spi(TDC1000_CONFIG_3_ADRESS, TDC1000_CONFIG_3);
+  write_spi(TDC1000_CONFIG_4_ADRESS, TDC1000_CONFIG_4);
+  write_spi(TDC1000_TOF_1_ADRESS, TDC1000_TOF_1);
+  write_spi(TDC1000_TOF_0_ADRESS, TDC1000_TOF_0);
+  write_spi(TDC1000_TIMEOUT_ADRESS, TDC1000_TIMEOUT);
+  write_spi(TDC1000_CLOCK_RATE_ADRESS, TDC1000_CLOCK_RATE);
+  chip_select(TDC_NONE);
   
-  uint8_t tdc1000chip;
-  uint8_t stm_int_pin;
+}
+
+MEASURE_RESULT measure(MEASURE_SET mset)
+{
+  MEASURE_RESULT result;
+  memset(&result, 0, sizeof(MEASURE_RESULT));
+  result.chip = mset.tdc7200;
   
-  switch (tdc7200chip) {
-    
-    case TDC7200_1:
-      tdc1000chip = TDC1000_1;
-      stm_int_pin = STM_TDC_INT_1_Pin;
-      break;
-      
-    case TDC7200_2:
-      tdc1000chip = TDC1000_2;
-      stm_int_pin = STM_TDC_INT_2_Pin;
-      break;
-      
-    case TDC7200_3:
-      tdc1000chip = TDC1000_3;
-      stm_int_pin = STM_TDC_INT_3_Pin;
-      break;
-      
-    default:
-      return -1;
-  }
+  /* СЃР±СЂР°СЃС‹РІР°РµРј СЂРµРіРёСЃС‚СЂ РѕС€РёР±РѕРє Рё СЃРёРіРЅР°Р» ERRB РЅР° TDC1000 */
+  write_chip(mset.tdc1000, TDC1000_ERROR_FLAGS_ADRESS, 1);
   
-  /* устанавливаем на TDC1000 первый канал для измерений */
+  /** РїСЂРѕРёР·РІРѕРґРёРј РёР·РјРµСЂРµРЅРёРµ TOF РІ РѕРґРЅСѓ СЃС‚РѕСЂРѕРЅСѓ **/
+  /* СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР° TDC1000 1С‹Р№ РєР°РЅР°Р» РґР»СЏ РёР·РјРµСЂРµРЅРёР№ */
   GPIO_ResetBits(GPIOC, TDC1000_CHSEL_Pin);
   
-  /* сбрасываем регистр ошибок и сигнал ERRB на TDC1000 */
-  write_spi(tdc1000chip, TDC1000_ERROR_FLAGS_ADRESS, 1);
+  /* РїРѕР»СѓС‡Р°РµРј tof 1 */
+	MEASURE_RESULT r1 = get_tof(mset);
+  if((r1.err | r1.tdc1000err | r1.tdc7200err) != 0)
+    return r1;
   
-      
-  /** начинаем измерение **/
-  /* записываем 1 в последний бит регистра CONFIG1 на TDC7200 */
-  write_spi(tdc7200chip, TDC7200_CONFIG1_ADRESS, TDC7200_CONFIG1 | TDC7200_CONFIG1_START_NEW_MEAS);
-  
-  /* ждем сигнал завершения измерений */
-  while(GPIO_ReadInputDataBit(GPIOE, stm_int_pin) == 0) ;
-  
-  /* разбираемся были ли ошибки при измерении */
-  result.tdc1000err = read_spi(tdc1000chip, TDC1000_ERROR_FLAGS_ADRESS);
-  
-  if(result.tdc1000err != 0)
-    return result;
-  
-  result.tdc7200err = read_spi(tdc7200chip, TDC7200_INTRPT_STATUS_ADRESS);
-  
-  if(result.tdc7200err != 0)
-    return result;
+  result.tof1 = r1.tof1;
   
   
-  /** если измерение прошло нормально, то производми вычисления **/
-  /*! пока только для одного сигнала STOP */
-  /* читаем регистры с полученными данными */
-  uint16_t time1 = read_spi(tdc7200chip, TDC7200_TIME1_ADRESS);
-  uint16_t time2 = read_spi(tdc7200chip, TDC7200_TIME2_ADRESS);
-//  uint16_t time3 = read_spi(tdc7200chip, TDC7200_TIME3_ADRESS);
-//  uint16_t time4 = read_spi(tdc7200chip, TDC7200_TIME4_ADRESS);
-//  uint16_t time5 = read_spi(tdc7200chip, TDC7200_TIME5_ADRESS);
-//  uint16_t time6 = read_spi(tdc7200chip, TDC7200_TIME6_ADRESS);
-
-  uint16_t clock_count1 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT1_ADRESS);
-//  uint16_t clock_count2 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT2_ADRESS);
-//  uint16_t clock_count3 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT3_ADRESS);
-//  uint16_t clock_count4 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT4_ADRESS);
-//  uint16_t clock_count5 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT5_ADRESS);
-//  uint16_t clock_count6 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT6_ADRESS);
+  /*! РїСЂРѕРёР·РІРѕРґРёРј РёР·РјРµСЂРµРЅРёРµ TOF РІ РѕР±СЂР°С‚РЅСѓСЋ СЃС‚РѕСЂРѕРЅСѓ */
+  /* СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР° TDC1000 2РѕР№ РєР°РЅР°Р» РґР»СЏ РёР·РјРµСЂРµРЅРёР№ */
+  GPIO_SetBits(GPIOC, TDC1000_CHSEL_Pin);
   
-  uint16_t calibration1 = read_spi(tdc7200chip, TDC7200_CALIBRATION1_ADRESS);
-  uint16_t calibration2 = read_spi(tdc7200chip, TDC7200_CALIBRATION2_ADRESS);
-  uint8_t calibration2periods = read_spi(tdc7200chip, TDC7200_CONFIG2_ADRESS) & 0xC0;
-    
-  /* определяем количество калибровок */
-  switch (calibration2periods) {
-    case 0:
-      calibration2periods = 2;
-      break;
-    case 0x40:
-      calibration2periods = 10;
-    case 0x80:
-      calibration2periods = 20;
-      break;
-    case 0xC0:
-      calibration2periods = 40;
-    default:
-      result.err = -1;
-      return result;
-  }
+  /* РїРѕР»СѓС‡Р°РµРј tof 2 */
+  MEASURE_RESULT r2 = get_tof(mset);
+  if((r2.err | r2.tdc1000err | r2.tdc7200err) != 0)
+    return r2;
   
-  double clock_period = 1.0 / FREQ;
-  double calCount = (calibration2 - calibration1) / (calibration2periods - 1);
-  double normLSB = (1.0 / FREQ) / calCount;
+  result.tof2 = r1.tof2;
   
-  result.tof1 = normLSB * time1 + clock_count1 * clock_period - normLSB * time2;
-  
-  /*! производим измерение в обратную сторону */
-  
-  
-  
-  
-  
+  return result;
   
 }
 
-void write_spi(int chip, uint16_t addr, uint8_t data)
+void write_chip(uint8_t chip, uint16_t addr, uint8_t data)
 {
   chip_select(chip);
   
   uint16_t spi_data =  TDC_WRITE | TDC_ADDR(addr) | data;
   
-  /* ждем готовность шины к записи */
+  /* Р¶РґРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ С€РёРЅС‹ Рє Р·Р°РїРёСЃРё */
   while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET) ;
   SPI_I2S_SendData(SPI2, spi_data);
   
-  /* ждем готовность шины */
+  /* Р¶РґРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ С€РёРЅС‹ */
   while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY) == SET) ;
   SPI_I2S_ReceiveData(SPI2);
   
-  chip_select();
+  chip_select(TDC_NONE);
   
 }
 
-uint16_t read_spi(int chip, uint16_t addr)
+void write_spi(uint16_t addr, uint8_t data)
+{
+  uint16_t spi_data =  TDC_WRITE | TDC_ADDR(addr) | data;
+  
+  /* Р¶РґРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ С€РёРЅС‹ Рє Р·Р°РїРёСЃРё */
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET) ;
+  SPI_I2S_SendData(SPI2, spi_data);
+  
+  /* Р¶РґРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ С€РёРЅС‹ */
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY) == SET) ;
+  SPI_I2S_ReceiveData(SPI2);
+}
+
+uint16_t read_chip(uint8_t chip, uint16_t addr)
 {
   chip_select(chip);
       
   uint16_t spi_data =  TDC_READ | TDC_ADDR(addr) | 0x10;
   
-  /* ждем готовность шины */
+  /* Р¶РґРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ С€РёРЅС‹ */
   while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY) == SET) ;
   SPI_I2S_SendData(SPI2, spi_data);
   
@@ -305,18 +226,33 @@ uint16_t read_spi(int chip, uint16_t addr)
   
   uint16_t out_data = SPI_I2S_ReceiveData(SPI2);
   
-  chip_select();
+  chip_select(TDC_NONE);
   
   return out_data;
 }
 
-void chip_select(int chip)
+uint16_t read_spi(uint16_t addr)
 {
-  /** сбрасываем CSB на всех микросхемах TDC **/
+  uint16_t spi_data =  TDC_READ | TDC_ADDR(addr) | 0x10;
+  
+  /* Р¶РґРµРј РіРѕС‚РѕРІРЅРѕСЃС‚СЊ С€РёРЅС‹ */
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY) == SET) ;
+  SPI_I2S_SendData(SPI2, spi_data);
+  
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) != SET);
+  
+  uint16_t out_data = SPI_I2S_ReceiveData(SPI2);
+  
+  return out_data;
+}
+
+void chip_select(uint8_t chip)
+{
+  /** СЃР±СЂР°СЃС‹РІР°РµРј CSB РЅР° РІСЃРµС… РјРёРєСЂРѕСЃС…РµРјР°С… TDC **/
   GPIO_SetBits(GPIOC, TDC7200_SPI_CSB_1_Pin | TDC7200_SPI_CSB_2_Pin | TDC7200_SPI_CSB_3_Pin | 
                       TDC1000_SPI_CSB_1_Pin | TDC1000_SPI_CSB_2_Pin | TDC1000_SPI_CSB_3_Pin);
   
-  /** выставляем CSB на нужной микросхеме **/
+  /** РІС‹СЃС‚Р°РІР»СЏРµРј CSB РЅР° РЅСѓР¶РЅРѕР№ РјРёРєСЂРѕСЃС…РµРјРµ **/
   switch (chip) {
     case TDC7200_1:
       GPIO_ResetBits(GPIOC, TDC7200_SPI_CSB_1_Pin);
@@ -324,7 +260,6 @@ void chip_select(int chip)
       
     case TDC7200_2:
       GPIO_ResetBits(GPIOC, TDC7200_SPI_CSB_2_Pin);
-      GPIO_ResetBits(GPIOC, TDC1000_SPI_CSB_2_Pin);
       break;
       
     case TDC7200_3:
@@ -332,7 +267,7 @@ void chip_select(int chip)
       break;
       
     case TDC1000_1:
-      GPIO_ResetBits(GPIOC, TDC1000_SPI_CSB_3_Pin);
+      GPIO_ResetBits(GPIOC, TDC1000_SPI_CSB_1_Pin);
       break;
       
     case TDC1000_2:
@@ -347,7 +282,83 @@ void chip_select(int chip)
   
 }
 
+MEASURE_RESULT get_tof(MEASURE_SET mset)
+{
+  MEASURE_RESULT result;
+//  memset(&result, 0, sizeof(TOF_MEASURE));
+  result.chip = mset.tdc7200;
+  
+  /* Р·Р°РїРёСЃС‹РІР°РµРј 1 РІ РїРѕСЃР»РµРґРЅРёР№ Р±РёС‚ СЂРµРіРёСЃС‚СЂР° CONFIG1 РЅР° TDC7200 */
+  write_chip(mset.tdc7200, TDC7200_CONFIG1_ADRESS, TDC7200_CONFIG1 | 1);
+  
+  /* Р¶РґРµРј СЃРёРіРЅР°Р» Р·Р°РІРµСЂС€РµРЅРёСЏ РёР·РјРµСЂРµРЅРёР№ */
+  while(GPIO_ReadInputDataBit(GPIOE, mset.int_pin) != 0) ;
+  
+  /* СЂР°Р·Р±РёСЂР°РµРјСЃСЏ, Р±С‹Р»Рё Р»Рё РѕС€РёР±РєРё РїСЂРё РёР·РјРµСЂРµРЅРёРё */
+  result.tdc1000err = read_chip(mset.tdc1000, TDC1000_ERROR_FLAGS_ADRESS);
+  
+  if(result.tdc1000err != 0)
+    return result;
+  
+  result.tdc7200err = read_chip(mset.tdc7200, TDC7200_INT_STATUS_ADRESS);
+  
+  if(result.tdc7200err != 0)
+    return result;
+  
+  
+  /** РµСЃР»Рё РёР·РјРµСЂРµРЅРёРµ РїСЂРѕС€Р»Рѕ РЅРѕСЂРјР°Р»СЊРЅРѕ, С‚Рѕ РїСЂРѕРёР·РІРѕРґРјРё РІС‹С‡РёСЃР»РµРЅРёСЏ **/
+  /*! РїРѕРєР° С‚РѕР»СЊРєРѕ РґР»СЏ РѕРґРЅРѕРіРѕ СЃРёРіРЅР°Р»Р° STOP */
+  
+  /* С‡РёС‚Р°РµРј СЂРµРіРёСЃС‚СЂС‹ tdc7200 СЃ РїРѕР»СѓС‡РµРЅРЅС‹РјРё РґР°РЅРЅС‹РјРё */
+  chip_select(mset.tdc7200);
+  
+  uint16_t time1 = read_spi(TDC7200_TIME1_ADRESS);
+  uint16_t time2 = read_spi(TDC7200_TIME2_ADRESS);
+//  uint16_t time3 = read_spi(tdc7200chip, TDC7200_TIME3_ADRESS);
+//  uint16_t time4 = read_spi(tdc7200chip, TDC7200_TIME4_ADRESS);
+//  uint16_t time5 = read_spi(tdc7200chip, TDC7200_TIME5_ADRESS);
+//  uint16_t time6 = read_spi(tdc7200chip, TDC7200_TIME6_ADRESS);
 
+  uint16_t clock_count1 = read_spi(TDC7200_CLOCK_COUNT1_ADRESS);
+//  uint16_t clock_count2 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT2_ADRESS);
+//  uint16_t clock_count3 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT3_ADRESS);
+//  uint16_t clock_count4 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT4_ADRESS);
+//  uint16_t clock_count5 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT5_ADRESS);
+//  uint16_t clock_count6 = read_spi(tdc7200chip, TDC7200_CLOCK_COUNT6_ADRESS);
+  
+  uint16_t calibration1 = read_spi(TDC7200_CALIBRATION1_ADRESS);
+  uint16_t calibration2 = read_spi(TDC7200_CALIBRATION2_ADRESS);
+  uint8_t calibration2periods = read_spi(TDC7200_CONFIG2_ADRESS);
+  
+  chip_select(TDC_NONE);
+  
+  /* РѕРїСЂРµРґРµР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РєР°Р»РёР±СЂРѕРІРѕРє */
+  switch (calibration2periods & 0xC0) {
+    case 0:
+      calibration2periods = 2;
+      break;
+    case 0x40:
+      calibration2periods = 10;
+      break;
+    case 0x80:
+      calibration2periods = 20;
+      break;
+    case 0xC0:
+      calibration2periods = 40;
+      break;
+  }
+  
+  double clock_period = 1.0 / FREQ;
+  double calCount = (calibration2 - calibration1) / (calibration2periods - 1);
+  double normLSB = (1.0 / FREQ) / calCount;
+  
+  result.tof1 = normLSB * time1 + clock_count1 * clock_period - normLSB * time2;
+  
+  return result;
+}
+
+
+/* РЎРўРђР Р«Р• Р¤РЈРќРљР¦РР 
 void TDC_switch_chanel(char ch)
 {
     int ifor;
@@ -432,12 +443,12 @@ char TDC_write_data(char ch, unsigned char addr, char data_for_send)
     
     out_data = SPI_I2S_ReceiveData(SPI2);
 
-    /*out_data=0x0010;
-        sd=TDC_READ | TDC_ADDR(addr) | out_data;
-        SPI_I2S_SendData(SPI2, sd);
-  while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_RXNE) != SET);
-  out_data = SPI_I2S_ReceiveData(SPI2);
-        */
+//    out_data=0x0010;
+//        sd=TDC_READ | TDC_ADDR(addr) | out_data;
+//        SPI_I2S_SendData(SPI2, sd);
+//  while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_RXNE) != SET);
+//  out_data = SPI_I2S_ReceiveData(SPI2);
+       
     TDC_switch_chanel(10);
     return out_data;
 }
@@ -524,14 +535,14 @@ int TDC_one_TOF(char ch, double* calc_time)
 
     }
 
-    /*
-                the_printf("TDC_GetTOF TIME1 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME1_REG));
-                the_printf("TDC_GetTOF TIME2 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME2_REG));
-                the_printf("TDC_GetTOF TIME3 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME3_REG));
-                the_printf("TDC_GetTOF TIME4 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME4_REG));
-                the_printf("TDC_GetTOF TIME5 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME5_REG));
-                the_printf("TDC_GetTOF TIME6 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME6_REG));
-    */
+    
+//                the_printf("TDC_GetTOF TIME1 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME1_REG));
+//                the_printf("TDC_GetTOF TIME2 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME2_REG));
+//                the_printf("TDC_GetTOF TIME3 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME3_REG));
+//                the_printf("TDC_GetTOF TIME4 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME4_REG));
+//                the_printf("TDC_GetTOF TIME5 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME5_REG));
+//                the_printf("TDC_GetTOF TIME6 %d\n\r",TDC_read24_data(ch,TI_TDC720x_TIME6_REG));
+    
 
     if (TDC7200_WORK_MODE==1)
     {
@@ -771,3 +782,4 @@ double TDC_Calibrate(double time_delay, float first_max_delay, int max_steps,dou
     return hard_delay;
 
 }
+**/

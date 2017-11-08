@@ -40,6 +40,7 @@
 #define TDC7200_CONFIG2_AVG_CYCLES_64             (6 << 3)
 #define TDC7200_CONFIG2_AVG_CYCLES_128            (7 << 3)
 
+#define TDC7200_CONFIG2_NUM_STOP_1                0
 #define TDC7200_CONFIG2_NUM_STOP_2                1           /** 3 бита **/
 #define TDC7200_CONFIG2_NUM_STOP_3                2
 #define TDC7200_CONFIG2_NUM_STOP_4                3
@@ -84,53 +85,35 @@
 
 
 /*! ------------ TDC7200 REGISTER ADRESSES -------------- */
-#define TDC7200_CONFIG1_ADRESS                         0x00 
-#define TDC7200_CONFIG2_ADRESS                         0x01 
+#define TDC7200_CONFIG1_ADRESS                        0x00 
+#define TDC7200_CONFIG2_ADRESS                        0x01 
 
-#define TDC7200_INTRPT_STATUS_ADRESS                   0x02 
-#define TDC7200_INTRPT_MASK_ADRESS                     0x03 
+#define TDC7200_INT_STATUS_ADRESS                     0x02 
+#define TDC7200_INT_MASK_ADRESS                       0x03 
 
-#define TDC7200_COARSE_COUNTER_OVH_ADRESS              0x04 
-#define TDC7200_COARSE_COUNTER_OVL_ADRESS              0x05 
+#define TDC7200_COARSE_CNTR_OVF_H_ADRESS              0x04 
+#define TDC7200_COARSE_CNTR_OVF_L_ADRESS              0x05 
 
-#define TDC7200_CLOCK_COUNTER_OVH_ADRESS               0x06 
-#define TDC7200_CLOCK_COUNTER_OVL_ADRESS               0x07 
+#define TDC7200_CLOCK_CNTR_OVF_H_ADRESS               0x06 
+#define TDC7200_CLOCK_CNTR_OVF_L_ADRESS               0x07 
 
-#define TDC7200_CLOCK_COUNTER_STOP_MASKH_ADRESS        0x08 
-#define TDC7200_CLOCK_COUNTER_STOP_MASKL_ADRESS        0x09
+#define TDC7200_CLOCK_CNTR_STOP_MASK_H_ADRESS         0x08 
+#define TDC7200_CLOCK_CNTR_STOP_MASK_L_ADRESS         0x09
 
-#define TDC7200_TIME1_ADRESS                           0x10
-#define TDC7200_CLOCK_COUNT1_ADRESS                    0x11
-#define TDC7200_TIME2_ADRESS                           0x12
-#define TDC7200_CLOCK_COUNT2_ADRESS                    0x13
-#define TDC7200_TIME3_ADRESS                           0x14
-#define TDC7200_CLOCK_COUNT3_ADRESS                    0x15
-#define TDC7200_TIME4_ADRESS                           0x16
-#define TDC7200_CLOCK_COUNT4_ADRESS                    0x17
-#define TDC7200_TIME5_ADRESS                           0x18
-#define TDC7200_CLOCK_COUNT5_ADRESS                    0x19
-#define TDC7200_TIME6_ADRESS                           0x1A
+#define TDC7200_TIME1_ADRESS                          0x10
+#define TDC7200_CLOCK_COUNT1_ADRESS                   0x11
+#define TDC7200_TIME2_ADRESS                          0x12
+#define TDC7200_CLOCK_COUNT2_ADRESS                   0x13
+#define TDC7200_TIME3_ADRESS                          0x14
+#define TDC7200_CLOCK_COUNT3_ADRESS                   0x15
+#define TDC7200_TIME4_ADRESS                          0x16
+#define TDC7200_CLOCK_COUNT4_ADRESS                   0x17
+#define TDC7200_TIME5_ADRESS                          0x18
+#define TDC7200_CLOCK_COUNT5_ADRESS                   0x19
+#define TDC7200_TIME6_ADRESS                          0x1A
 
-#define TDC7200_CALIBRATION1_ADRESS                    0x1B
-#define TDC7200_CALIBRATION2_ADRESS                    0x1C
+#define TDC7200_CALIBRATION1_ADRESS                   0x1B
+#define TDC7200_CALIBRATION2_ADRESS                   0x1C
 
-
-
-/*! --------------- TDC7200 CONFIG1 -------------- !*/
-#define TDC7200_CONFIG1 TDC7200_CONFIG1_FORCE_CALIBRATION_ALWAYS  | \
-                        TDC7200_CONFIG1_PARITY_DISABLED           | \
-                        TDC7200_CONFIG1_TRIGG_EDGE_RISING         | \
-                        TDC7200_CONFIG1_STOP_EDGE_RISING          | \
-                        TDC7200_CONFIG1_START_EDGE_RISING         | \
-                        TDC7200_CONFIG1_MEAS_MODE_2               | \
-                        TDC7200_CONFIG1_START_MEAS_NO       
-
-#define TDC7200_CONFIG1_START_NEW_MEAS (TDC7200_CONFIG1 | 1)
-
-
-/** TDC7200 CONFIG2 **/
-#define TDC7200_CONFIG2 (TDC7200_CONFIG2_CALIBRATION2_PERIODS << 6) | \
-                        (TDC7200_CONFIG2_AVG_CYCLES           << 3) | \
-                        (TDC7200_CONFIG2_NUM_STOP             << 0)
 
 #endif // TDC7200_REGISTERS_H

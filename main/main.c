@@ -39,12 +39,17 @@
 #define dis1 0.0659
 #endif
 
+MEASURE_SET mset1;
+MEASURE_SET mset2;
+MEASURE_SET mset3;
+
 //#include "..\_out_protocols\out_protocols.h"
 
 
 //void I2C_burst_read(I2C_TypeDef* I2Cx, uint8_t HW_address, uint8_t addr, uint8_t n_data, uint8_t *data);
 //void I2C_single_write(uint8_t HW_address, uint8_t addr);
 int the_printf(const char *str, ...);
+int the_printf2(const char *str, ...);
 int Debag_printf_uart1(char *str);
 void Send_data_to_nav(char *str,int size_to_send);
 void Send_data_from_nav(char *str,int size_to_send);
@@ -883,7 +888,8 @@ void init_SD_fat(FATFS* FATFS_Obj,FIL* fp)
 
 int main(void)
 {
-    int ifor;//,ifor2;
+  
+	int ifor;//,ifor2;
     bool last_usb_status;
     bool have_valid_gps_data = true;	
     uint16_t USB_Pin = GPIO_Pin_0;
@@ -914,12 +920,11 @@ int main(void)
     in_array_work = in_array_2;
     in_array_work_level = &in_array_2_level;
     
-    /*
-    out_array_1_level=0;
-    out_array_2_level=0;
-    out_array_work=out_array_2;
-    out_array_work_level=&out_array_2_level;
-			*/
+//    out_array_1_level=0;
+//    out_array_2_level=0;
+//    out_array_work=out_array_2;
+//    out_array_work_level=&out_array_2_level;
+
 
 #ifndef POPLAVOK
     global_status = (status_struct*)malloc(sizeof(status_struct));
@@ -959,12 +964,7 @@ int main(void)
 		else {
 			the_printf("Init I2C_Orient error\n");	
 		}
-    
-    /*! --------- TDC initialization ----------- !*/
-    the_printf("Init TDC_SPI_Init\n");
-    TDC_SPI_Init();
-    the_printf("Init TDC_SPI_Init done\n");
-    
+
 #endif
     
     the_printf("Init SD SPI\n");
@@ -993,14 +993,14 @@ int main(void)
     }
 
 #ifndef POPLAVOK
-		
+		/**
     Keller_read_data(&global_status->keller_data);
     
     the_printf("Keller %d:PRES %d:TEMP\n", global_status->keller_data.pressure_data, global_status->keller_data.temp_data);
     //RS485_printf("Keller %f:PRES %f:TEMP\n\r", k_pres, k_temp);
-    
+    **/
     if (Orient_read_data(&global_status->orient_data) != 0) {
-        the_printf("Orient read : error to read\n\r");
+        the_printf2("Orient read : error to read\n\r");
     }
     else {
         the_printf("Orient read :\n\r x_ax: %d\n\r y_ax: %d\n\r z_ax: %d\n\r",
@@ -1021,14 +1021,37 @@ int main(void)
         the_printf("temp: %d\n\r",global_status->orient_data.temp_data);
     }
     
-    /*! свиридов. !*/
+
+#endif    
+		
+		
+		/*! свиридов. !*/
 //    tdc_calibrate=TDC_Calibrate(-3.e-6,50,100,dis1,dis2,dis3);
     
-#endif
 
+		
+		/*! --------- TDC initialization ----------- !*/
+    the_printf("Init TDC_SPI_Init\n");
+    tdc_init();
+    the_printf("Init TDC_SPI_Init done\n");
+
+    /* определяем значения для измерения скорости потока */
+    mset1.int_pin = STM_TDC_INT_1_Pin;
+    mset1.tdc1000 = TDC1000_1;
+    mset1.tdc7200 = TDC7200_1;
+    
+    mset2.int_pin = STM_TDC_INT_2_Pin;
+    mset2.tdc1000 = TDC1000_2;
+    mset2.tdc7200 = TDC7200_2;
+    
+    mset3.int_pin = STM_TDC_INT_3_Pin;
+    mset3.tdc1000 = TDC1000_3;
+    mset3.tdc7200 = TDC7200_3;
+    
+    
     //основное тело
     while(1) {
-				
+				/**
       //USART_2
         GPIO_ResetBits(GPIOD, GPIO_Pin_0);    //TXEN(DE) D0
         GPIO_ResetBits(GPIOD, GPIO_Pin_1);  	//RXEN(RE) D1	  
@@ -1113,7 +1136,26 @@ int main(void)
 				iter_index++;
 				if (iter_index>=speed_spline) iter_index=0;
 				
-        /*! ----- Getting TOF ------- !*/
+				**/
+				
+				the_printf("777  \n");
+				
+        /*! ----- Измерение скорости потока ------- !*/
+        
+        /** первое измерение **/
+        MEASURE_RESULT measure1 = measure(mset1);
+        print_measure_result(measure1);
+
+        /** второе измерение **/
+        MEASURE_RESULT measure2 = measure(mset2);
+        print_measure_result(measure2);
+        
+        /** третье измерение **/
+        MEASURE_RESULT measure3 = measure(mset3);
+        print_measure_result(measure3);
+          
+        
+        /* СТАРЫЙ КОД 
         if (TDC_GetTOF(0, &t_dir, &t_back, tdc_calibrate) == 0) {
           
             v_spline[iter_index] = t_dir;
@@ -1254,13 +1296,16 @@ int main(void)
             
             the_printf("Error to get TOF 3\n\r");
         }
+        */
         
         
-        RS485_send_status(global_status);
+				/**
+				
+				RS485_send_status(global_status);
 
 #endif
 
-        /*Навигация пытаемся писать*/
+        // Навигация пытаемся писать
 
         if (have_valid_gps_data)
         {
@@ -1279,14 +1324,55 @@ int main(void)
             buff_1_level=0;
             buff_2_level=0;
         }
+						**/
     }
+
 }
 
 
-
+void print_measure_result(MEASURE_RESULT measure) 
+{
+  
+  if(measure.err != 0) {
+    //the_printf("measure %d: Error: %d\n", measure.chip, measure.err);
+		the_printf2("000  \n");
+  }
+  
+  else if (measure.tdc1000err != 0) {
+    //the_printf("measure %d: TDC1000 ERROR_FLAGS Register: %d\n", measure.chip, measure.tdc1000err);
+		the_printf2("111  \n");
+  }
+  
+  else if (measure.tdc7200err != 0) {
+    //the_printf("measure %d: TDC7200 INT_STATUS Register: %d\n", measure.chip, measure.tdc7200err);
+		the_printf2("222  \n");
+  }    
+  
+  else {
+    
+    //the_printf("measure %d: tof1 = %0.4f, tof2 = %0.4f\n", measure.chip, measure.tof1, measure.tof2);
+    the_printf2("333  \n");
+  }
+}
 
 
 int the_printf(const char *str, ...)
+{
+	//return 0;
+    char info_string[128];
+    va_list ap;
+    va_start(ap,str); // начало параметров
+    vsprintf(info_string,str,ap);
+    va_end(ap);     // очистка параметров
+	/**
+#ifndef POPLAVOK
+    RS485_printf("%s\r",info_string);
+#endif
+	**/
+    return Debag_printf_uart1((char*)(&info_string));
+}
+
+int the_printf2(const char *str, ...)
 {
 
     char info_string[128];
@@ -1294,13 +1380,12 @@ int the_printf(const char *str, ...)
     va_start(ap,str); // начало параметров
     vsprintf(info_string,str,ap);
     va_end(ap);     // очистка параметров
+	/**
 #ifndef POPLAVOK
     RS485_printf("%s\r",info_string);
-#endif
-    return Debag_printf_uart1(info_string);
+#endif **/
+    return Debag_printf_uart1((char*)str);
 }
-
-
 
 
 int Debag_printf_uart1(char *str)

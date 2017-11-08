@@ -25,14 +25,14 @@
 #define TDC1000_CONFIG_1_NUM_AVG_64             (6 << 3)
 #define TDC1000_CONFIG_1_NUM_AVG_128            (7 << 3)
 
-#define TDC1000_CONFIG_1_NUM_RX_1               0
-#define TDC1000_CONFIG_1_NUM_RX_2               1 /** 3 бита **/  
-#define TDC1000_CONFIG_1_NUM_RX_3               2
-#define TDC1000_CONFIG_1_NUM_RX_4               3
-#define TDC1000_CONFIG_1_NUM_RX_5               4
-#define TDC1000_CONFIG_1_NUM_RX_6               5
-#define TDC1000_CONFIG_1_NUM_RX_7               6
-#define TDC1000_CONFIG_1_NUM_RX_8               7
+#define TDC1000_CONFIG_1_NUM_RX_0               0
+#define TDC1000_CONFIG_1_NUM_RX_1               1 /** 3 бита **/  
+#define TDC1000_CONFIG_1_NUM_RX_2               2
+#define TDC1000_CONFIG_1_NUM_RX_3               3
+#define TDC1000_CONFIG_1_NUM_RX_4               4
+#define TDC1000_CONFIG_1_NUM_RX_5               5
+#define TDC1000_CONFIG_1_NUM_RX_6               6
+#define TDC1000_CONFIG_1_NUM_RX_7               7
 
 /* CONFIG_2 */
 #define TDC1000_CONFIG_2_VCOM_SEL_INTERNAL      0
@@ -104,8 +104,8 @@
 #define TDC1000_TOF_1_LNA_CTRL_ACTIVE                   0
 #define TDC1000_TOF_1_LNA_CTRL_OFF                      (1 << 3)
                                                         
-#define TDC1000_TOF_1_LNA_FB_ACTIVE                     0
-#define TDC1000_TOF_1_LNA_FB_OFF                        (1 << 2)
+#define TDC1000_TOF_1_LNA_FB_CAPACITIVE                 0
+#define TDC1000_TOF_1_LNA_FB_RESISTIVE                  (1 << 2)
                                                         
 #define TDC1000_TOF_1_TIMING_REG_0                      0
                                                         
@@ -113,8 +113,8 @@
 #define TDC1000_TOF_0_TIMING_REG_0                      0
 
 /* TIMEOUT */
-#define TDC1000_TIMEOUTFORCE_SHORT_TOF_DISABLED         0
-#define TDC1000_TIMEOUTFORCE_SHORT_TOF_ENABLED          (1 << 6)
+#define TDC1000_TIMEOUT_FORCE_SHORT_TOF_DISABLED         0
+#define TDC1000_TIMEOUT_FORCE_SHORT_TOF_ENABLED          (1 << 6)
 
 #define TDC1000_TIMEOUT_SHORT_TOF_BLANK_PERIOD_8xT0     0
 #define TDC1000_TIMEOUT_SHORT_TOF_BLANK_PERIOD_16xT0    (1 << 3)

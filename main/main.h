@@ -1,9 +1,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#include "stm32f10x.h"
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_tim.h"
+#include "tdc.h"
 #include <string.h >
 
 
@@ -30,5 +28,8 @@
 
 #define spi_cs_low() do { GPIO_CS->BRR = GPIO_Pin_CS;   for(ifor1 = 0; ifor1< 10000; ifor1 ++);} while (0)
 #define spi_cs_high() do { GPIO_CS->BSRR = GPIO_Pin_CS; for(ifor1 = 0; ifor1< 10000; ifor1 ++); } while (0)
+
+
+void print_measure_result(MEASURE_RESULT measure);
 
 #endif
